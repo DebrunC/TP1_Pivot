@@ -31,7 +31,7 @@ import java.util.Set;
 public class Pivot {
 	
 	//in the Map class we have the map function for the pivot 
-	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, MapWritable> {
+	public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, LongWritable, MapWritable> {
 		private Text word = new Text();
 		
 		
@@ -45,8 +45,8 @@ public class Pivot {
 		 * (1,[0,b]) 				(1,[1,e])					(1,[2,h])
 		 * (2,[0,c]) 				(2,[1,f])					(2,[2,i]) 
 		*/
-		public void map(LongWritable key, Text value, OutputCollector<IntWritable, MapWritable> output) throws IOException {
-			int row = 0;
+		public void map(LongWritable key, Text value, OutputCollector<LongWritable, MapWritable> output, Reporter reporter) throws IOException {
+			long row = 0;
 			MapWritable tab = new MapWritable();
 			String line = value.toString();
 			StringTokenizer tokenizer = new StringTokenizer(line,",");
@@ -66,7 +66,7 @@ public class Pivot {
 	
 	
 	//in the Reduce class we have the reduce function for the pivot 
-	 public static class Reduce extends MapReduceBase implements Reducer< IntWritable, MapWritable, IntWritable, Text> {
+	 public static class Reduce extends MapReduceBase implements Reducer< LongWritable, MapWritable, LongWritable, Text> {
 		 
 		 /*
 		  * the key and value are the result of the shuffle and sort
@@ -77,13 +77,13 @@ public class Pivot {
 		  *(1,'b,e,h')
 		  *(2,'c,f,i')
 		 */
-		 public void reduce(IntWritable key, Iterator<MapWritable> values, OutputCollector<IntWritable,Text> output) throws IOException {
-			 int count=0;
+		 public void reduce(LongWritable key, Iterator<MapWritable> values, OutputCollector<LongWritable,Text> output, Reporter reporter) throws IOException {
+			 long count=0;
 			 String word="";
 			 MapWritable tab = new MapWritable();
 			 // for the row 'key', we get all the result values of the shuffle and put them in a single map
 			 while (values.hasNext()) {
-				 for (  Entry<IntWritable,Text> map : values.next().entrySet()) {
+				 for (  Entry<LongWritable,Text> map : values.next().entrySet()) {
 					 tab.put(map.getKey(), map.getValue());}
 			 }
 			 //we create a string that represent our new row. Example : a,d,g
